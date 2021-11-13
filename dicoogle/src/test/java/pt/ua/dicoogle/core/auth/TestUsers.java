@@ -19,7 +19,10 @@
 package pt.ua.dicoogle.core.auth;
 
 import org.junit.*;
+import org.junit.rules.Stopwatch;
 import pt.ua.dicoogle.server.users.User;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
@@ -52,6 +55,32 @@ public class TestUsers {
         passwd = "VeryStrongPassword!!11";
         assertTrue(u.resetPassword(passwd));
         assertTrue(u.verifyPassword(passwd));
+    }
+
+    @Test
+    public void meranie() {
+        String password = "test long password...";
+        User u = User.create("User", false, password);
+        long start = System.nanoTime();
+        for (int i = 0; i < 1000; i++) {
+            u.verifyPassword(password.toCharArray());
+        }
+        long end = System.nanoTime();
+        long nano = end - start;
+        long millis = TimeUnit.NANOSECONDS.toMillis(nano);
+        long sec = TimeUnit.NANOSECONDS.toSeconds(nano);
+        long millisOnly = millis - TimeUnit.SECONDS.toMillis(sec);
+        long nanoOnly = nano - TimeUnit.MILLISECONDS.toNanos(millisOnly) - TimeUnit.SECONDS.toNanos(sec);
+        System.out.printf("Time = %ds, %dms, %dns.", sec, millisOnly, nanoOnly);
+        // 100x:
+        // OLD: Time = 5s, 540ms, 555900ns.
+        // NEW: Time = 0s,   1ms, 333600ns.
+        // Speedup: 4 154x
+
+        // 1000x:
+        // OLD: Time = 53s, 950ms, 984500ns.
+        // NEW: Time = 0s, 6ms, 804600ns.
+        // Speedup: 7928x
     }
 
 }

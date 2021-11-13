@@ -20,6 +20,7 @@ package pt.ua.dicoogle.server.users;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import at.favre.lib.crypto.bcrypt.LongPasswordStrategies;
+import org.eclipse.jetty.util.security.Credential;
 
 /**
  * This class provides a password hashing service.
@@ -50,8 +51,11 @@ public class HashService {
      */
     public static String hashPassword(char[] password) {
         try {
-            return BCrypt.with(LongPasswordStrategies.hashSha512(BCrypt.Version.VERSION_2B)).hashToString(HASH_STRENGTH,
-                    password);
+            String hash = Credential.MD5.digest(new String(password));
+            System.out.println("Hash: " + hash);
+            return hash;
+//            return BCrypt.with(LongPasswordStrategies.hashSha512(BCrypt.Version.VERSION_2B)).hashToString(HASH_STRENGTH,
+//                    password);
         } finally {
             for (int i = 0; i < password.length; i++) {
                 password[i] = '\0';
@@ -80,8 +84,10 @@ public class HashService {
      */
     public static boolean verifyPassword(String hash, char[] password) {
         try {
-            BCrypt.Result result = BCrypt.verifyer().verify(password, hash);
-            return result.verified;
+            String hash1 = Credential.MD5.digest(new String(password));
+            return hash.equals(hash1);
+//            BCrypt.Result result = BCrypt.verifyer().verify(password, hash);
+//            return result.verified;
         } finally {
             for (int i = 0; i < password.length; i++) {
                 password[i] = '\0';
